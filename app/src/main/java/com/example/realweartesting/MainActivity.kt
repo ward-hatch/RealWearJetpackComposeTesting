@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -19,7 +20,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.realweartesting.ui.theme.RealWearTestingTheme
 
 class MainActivity : ComponentActivity() {
@@ -28,7 +29,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             RealWearTestingTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    modifier = Modifier.fillMaxSize()
+                        .semantics { contentDescription = "hf_no_overlay|hf_no_number|hf_use_description" }
+                ) { innerPadding ->
                     Box(
                         modifier = Modifier
                             .padding(innerPadding)
@@ -38,12 +42,20 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.align(Alignment.Center)
                         ) {
                             Greeting(
-                                name = "Android"
+                                text = "Android 1",
+                                command = "Test 1",
+                                onClick = { println("Greeting 1 clicked") },
                             )
-                            Greeting2(
-                                name = "Android"
+                            Greeting(
+                                text = "Android 2",
+                                command = "Test 2",
+                                onClick = { println("Greeting 2 clicked") },
                             )
-                            Greeting3(commands = listOf("Test1", "Test2"))
+                            MultipleGreetings(
+                                text = "Android 3",
+                                commands = listOf("Test 3", "Test 4"),
+                                onClick = { println("MultipleGreetings clicked") }
+                            )
                         }
 
                     }
@@ -54,92 +66,49 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .semantics {
-                contentDescription = "hf_use_description"
-            }
+fun Greeting(
+    text: String,
+    command: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        modifier = modifier,
+        onClick = onClick,
     ) {
-        Button(
-            modifier = Modifier
-                .semantics {
-                    contentDescription = "Test"
-                },
-            onClick = {}
-        ) {
-            Text(name)
-        }
+        WearHfClickableContainerCommand(command)
+        Text(text)
     }
 }
 
 @Composable
-fun Greeting2(name: String, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .semantics {
-                contentDescription = "hf_use_description"
-            }
-    ) {
-        Button(
-            modifier = Modifier
-                .semantics {
-                    contentDescription = "Test"
-                },
-            onClick = {}
-        ) {
-            Text(name)
-            WearHfClickableContainerCommand(name)
-        }
-    }
-}
-
-@Composable
-fun Greeting3(modifier: Modifier = Modifier, commands: List<String>){
-    Box(
-        modifier = modifier
-            .semantics {
-                contentDescription = "hf_use_description"
-            }
-    ) {
-        Button(
-            modifier = Modifier
-                .semantics {
-                    contentDescription = "Test"
-                },
-            onClick = {}
-        ) {
-            Text(commands.toString())
-            WearHfClickableContainerCommands(commands){}
-        }
-    }
-}
-
-@Composable
-fun WearHfClickableContainerCommands(
+fun MultipleGreetings(
+    text: String,
     commands: List<String>,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        modifier = modifier,
+        onClick = onClick,
     ) {
-    Box(
-        modifier = Modifier
-            .focusProperties { canFocus = false }
-            .clickable(onClick = onClick)
-            .semantics {
-                contentDescription = "hf_no_overlay|hf_commands: ${commands.joinToString(", ")}"
-            }
-    )
-}
-
-@Composable
-fun WearHfClickableContainerCommand(command: String) {
-    Text(text = command, modifier = Modifier.alpha(0f))
-
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    RealWearTestingTheme {
-        Greeting("Android")
+        Text(
+            text = text,
+            modifier = Modifier
+                .focusProperties { canFocus = false }
+                .clickable(onClick = onClick)
+                .semantics {
+                    contentDescription = "hf_commands: ${commands.joinToString(", ")}"
+                },
+        )
     }
 }
+
+@Composable
+fun WearHfClickableContainerCommand(
+    command: String,
+) {
+    Text(text = command, modifier = Modifier.minSize().alpha(0f))
+}
+
+private fun Modifier.minSize() = this.then(Modifier.size(1.dp))
